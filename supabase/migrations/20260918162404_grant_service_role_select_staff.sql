@@ -1,0 +1,27 @@
+-- =====================================================================
+-- Дополнительный грант SELECT на staff для service_role
+--
+-- Что делает: добавляет service_role привилегию select на public.staff.
+--   insert и update выданы предыдущей миграцией и остаются.
+--
+-- Зависит от: <timestamp>_grant_service_role_staff.sql (insert, update).
+--
+-- Зачем: предыдущая миграция исходила из того, что upsert сида без
+--   .select() обходится insert и update. Прогон npm run seed:staff это
+--   опроверг: 42501 с подсказкой GRANT SELECT ON public.staff.
+--   select - [вариант 1] ON CONFLICT DO UPDATE читает существующую строку
+--            по user_id и значения excluded, Postgres требует на это SELECT;
+--          - [вариант 2] PostgREST оборачивает запись в CTE и читает из
+--            неё, даже без .select() в клиенте; голому INSERT ... ON
+--            CONFLICT хватает insert и update (проверено через psql).
+--   Отдельной миграцией, а не правкой предыдущей: та уже отправлена
+--   в облако через db push, повторно она не выполнится.
+--
+-- Как проверить:
+--   npm run seed:staff - два прогона подряд без ошибок (вставка, затем
+--   обновление существующих строк).
+--   Негатив: select has_table_privilege('service_role', 'public.staff', 'DELETE');
+--   -> false
+-- =====================================================================
+
+grant select on public.staff to service_role;

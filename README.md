@@ -1,36 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Роли и доступ
 
-## Getting Started
+### Где политика берёт роль
 
-First, run the development server:
+**Выбрано: роль в таблице `staff`.** Политики вызывают `current_staff_role()` - security definer функцию, которая читает `staff` по `auth.uid()`. Изменение роли или деактивация действуют со следующего запроса. Цена - чтение `staff` на каждый запрос; обёртка `(select ...)` сводит его к одному разу на запрос.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+**Альтернатива: роль в JWT.** Custom Access Token Hook (Postgres-функция, которую Auth вызывает при выпуске токена) добавляет claim с ролью, политика читает `auth.jwt() ->> 'app_role'`. Обращений к таблице нет, но токен живёт до истечения (по умолчанию час): понижение прав и отключение сотрудника срабатывают с задержкой. Для системы, где отключённый оператор не должен ещё час выдавать инструмент, это неприемлемо.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Как появляется сотрудник
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Самостоятельная регистрация выключена. Строку в `staff` создаёт SUPERADMIN, первого суперадмина - `npm run seed:staff` через service_role.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Триггер на `auth.users` отвергнут:
+- создавал бы сотрудника любому, кто прошёл signup;
+- роль всё равно назначается руками;
+- ошибка в триггере ломает создание пользователя целиком.
 
-## Learn More
+### Как проверить
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. `npm run seed:staff`
+2. Выполнить `tests/policies/02_roles.sql` в SQL Editor или через `psql -f`. Скрипт проходит до конца без `FAIL`, в базе ничего не остаётся.
