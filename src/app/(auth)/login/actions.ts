@@ -13,7 +13,7 @@ export async function login(_prevState: string | null, formData: FormData) {
 
     if (error) {
         // Намеренно общий текст: не подсказываем, существует ли такой email.
-        return 'Неверный email или пароль'
+        return 'Incorrect email or password'
     }
 
     redirect('/tools')
