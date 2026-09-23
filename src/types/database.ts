@@ -39,6 +39,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      customers: {
+        Row: {
+          category: Database["public"]["Enums"]["customer_category"]
+          created_at: string
+          document_photo_path: string | null
+          full_name: string
+          id: string
+          phone: string
+          photo_path: string | null
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["customer_category"]
+          created_at?: string
+          document_photo_path?: string | null
+          full_name: string
+          id?: string
+          phone: string
+          photo_path?: string | null
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["customer_category"]
+          created_at?: string
+          document_photo_path?: string | null
+          full_name?: string
+          id?: string
+          phone?: string
+          photo_path?: string | null
+        }
+        Relationships: []
+      }
       staff: {
         Row: {
           created_at: string
@@ -98,6 +128,7 @@ export type Database = {
       }
     }
     Enums: {
+      customer_category: "PLATINUM" | "GOLD" | "SILVER" | "NON_GRATA"
       staff_role: "OPERATOR" | "MANAGER" | "SUPERADMIN"
     }
     CompositeTypes: {
@@ -229,6 +260,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      customer_category: ["PLATINUM", "GOLD", "SILVER", "NON_GRATA"],
       staff_role: ["OPERATOR", "MANAGER", "SUPERADMIN"],
     },
   },
