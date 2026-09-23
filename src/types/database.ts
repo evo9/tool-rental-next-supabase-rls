@@ -39,6 +39,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      category_grace_periods: {
+        Row: {
+          category: Database["public"]["Enums"]["customer_category"]
+          grace_hours: number
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["customer_category"]
+          grace_hours: number
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["customer_category"]
+          grace_hours?: number
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           category: Database["public"]["Enums"]["customer_category"]
@@ -71,6 +86,8 @@ export type Database = {
       }
       rental_items: {
         Row: {
+          amount: number | null
+          daily_rate: number
           id: string
           issue_photo_path: string | null
           rental_id: string
@@ -80,6 +97,8 @@ export type Database = {
           tool_unit_id: string
         }
         Insert: {
+          amount?: number | null
+          daily_rate: number
           id?: string
           issue_photo_path?: string | null
           rental_id: string
@@ -89,6 +108,8 @@ export type Database = {
           tool_unit_id: string
         }
         Update: {
+          amount?: number | null
+          daily_rate?: number
           id?: string
           issue_photo_path?: string | null
           rental_id?: string
@@ -126,6 +147,7 @@ export type Database = {
           closed_at: string | null
           created_by: string
           customer_id: string
+          grace_hours: number
           id: string
           issued_at: string
           note: string | null
@@ -136,6 +158,7 @@ export type Database = {
           closed_at?: string | null
           created_by?: string
           customer_id: string
+          grace_hours: number
           id?: string
           issued_at?: string
           note?: string | null
@@ -146,6 +169,7 @@ export type Database = {
           closed_at?: string | null
           created_by?: string
           customer_id?: string
+          grace_hours?: number
           id?: string
           issued_at?: string
           note?: string | null
@@ -257,6 +281,20 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calc_rental_amount: {
+        Args: {
+          p_grace_hours: number
+          p_issued: string
+          p_planned: string
+          p_rate: number
+          p_returned: string
+        }
+        Returns: {
+          amount: number
+          base_days: number
+          overdue_days: number
+        }[]
+      }
       current_staff_role: {
         Args: never
         Returns: Database["public"]["Enums"]["staff_role"]
@@ -271,6 +309,16 @@ export type Database = {
           rental_id: string
           rental_item_id: string
           tool_unit_id: string
+        }[]
+      }
+      rental_estimate: {
+        Args: { p_at?: string; p_rental_id: string }
+        Returns: {
+          amount: number
+          base_days: number
+          is_returned: boolean
+          overdue_days: number
+          rental_item_id: string
         }[]
       }
       return_rental_items: { Args: { p_items: Json }; Returns: undefined }

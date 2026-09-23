@@ -88,6 +88,12 @@ const RULES: Rule[] = [
         matches: (e) => e.message.includes('select at least one'),
         text: 'Select at least one unit.',
     },
+    {
+        // category_grace_periods.grace_hours (этап 5): check (between 0 and 72).
+        code: '23514',
+        matches: (e) => constraintName(e) === 'category_grace_periods_grace_hours_check',
+        text: 'Enter a grace period between 0 and 72 hours.',
+    },
 ];
 
 const GENERIC_BY_CODE: Record<string, string> = {

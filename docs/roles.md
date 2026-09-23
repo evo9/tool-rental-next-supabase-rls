@@ -72,9 +72,44 @@
 | читать, получить signed URL | да | пусто | пусто |
 | перезаписать, удалить | нет политики | нет политики | нет политики |
 
+## category_grace_periods, снимки тарифа и grace (этап 5)
+
+| Действие | OPERATOR | MANAGER | SUPERADMIN | не сотрудник | anon |
+|---|---|---|---|---|---|
+| читать grace периоды | да | да | да | пусто | 42501 |
+| менять grace периоды | 0 строк | да, в границах 0-72 | да, в границах 0-72 | 0 строк | 42501 |
+| создать/удалить категорию | 42501 (нет гранта) | 42501 | 42501 | 42501 | 42501 |
+| писать `rentals.grace_hours`, `rental_items.daily_rate`, `rental_items.amount` напрямую | 42501 (нет гранта) | 42501 | 42501 | 42501 | 42501 |
+
+`category_grace_periods` ведёт себя как `tools`/`tool_units`: грант на
+`update (grace_hours)` выдан любому `authenticated`, роль решает
+политика - поэтому `OPERATOR` получает "0 строк", а не `42501`.
+`rentals.grace_hours` и `rental_items.daily_rate`/`amount` устроены
+иначе - грант на запись не выдан вообще никому, включая `SUPERADMIN`:
+это снимки и итог, которые заполняют только триггеры
+(`rentals_set_grace_hours`, `rental_items_set_daily_rate`,
+`rental_items_set_return_amount`), приложение их не пишет ни при каких
+условиях.
+
+Тариф и grace фиксируются в момент создания строки (`rentals`/
+`rental_items`) и не меняются, даже если после этого поменяли
+`tools.daily_rate` или `category_grace_periods.grace_hours` - сумма уже
+выданной или закрытой аренды не "плывёт" задним числом.
+
+## rental_estimate
+
+| Действие | OPERATOR | MANAGER | SUPERADMIN | не сотрудник | anon |
+|---|---|---|---|---|---|
+| вызвать `rental_estimate()` | да | да | да | пусто (RLS внутри функции) | 42501 на execute |
+
+`security invoker`: функция не содержит отдельной проверки роли, всю
+работу делает RLS вызывающего на `rentals`/`rental_items` - у
+не-сотрудника соединение просто не находит строк и возвращает пустой
+результат, а не ошибку.
+
 ## Общее
 
 - Деактивированный сотрудник (`is_active = false`) не проходит ни одну политику, кроме чтения своей строки в `staff`.
 - Анонимный запрос к таблицам `public` отклоняется на уровне грантов (`42501`). На `storage.objects` грант у `anon` выдан Supabase, поэтому там ответ пустой, а не ошибка.
 
-Проверка: `tests/policies/02_roles.sql`, `tests/policies/03_customers.sql`, `tests/policies/04_rentals.sql`.
+Проверка: `tests/policies/02_roles.sql`, `tests/policies/03_customers.sql`, `tests/policies/04_rentals.sql`, `tests/pricing/05_calc.sql`, `tests/policies/05_pricing.sql`.
