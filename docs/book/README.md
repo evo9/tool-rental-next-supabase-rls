@@ -86,5 +86,6 @@ Supabase + RLS + серверный Next.js: как политики решаю�
 | [04-rentals.md](04-rentals.md) | 4 | Частичный индекс, RPC, `security definer` в триггере, инвариант через данные |
 | [05-pricing.md](05-pricing.md) | 5 | Тариф и просрочка, `immutable`/`stable`/`volatile`, снимок значений, `security invoker` в RPC, читающем чужие строки |
 | [06-audit-log.md](06-audit-log.md) | 6 | Аудит-лог, одна триггерная функция на несколько таблиц, `auth.uid()` внутри `security definer`, запрет записи двумя слоями |
+| [07-dashboard-import-qr.md](07-dashboard-import-qr.md) | 7 | Дашборд, `view` с `security_invoker` и ловушка обхода RLS, route handler, подтранзакции в plpgsql, импорт CSV, QR |
 
 Главы этапов 6 и далее дописываются по мере того, как сделаны сами этапы.

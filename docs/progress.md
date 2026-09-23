@@ -139,9 +139,41 @@ diff по `changed_fields` для UPDATE, полный снимок для INSER
 логу только SUPERADMIN, даже к записям о собственных действиях автора
 (`docs/rls-notes.md`, `docs/book/06-audit-log.md` раздел 7).
 
-## Этап 7. Дашборд и импорт
+## Этап 7. Дашборд, единицы, импорт, QR
 
-Не начат.
+Готово. Миграция `dashboard_and_import`: уникальный индекс
+`tools_name_normalized_key` по `lower(btrim(name))`, замена политики INSERT
+на `tool_units` (только `AVAILABLE` и `UNAVAILABLE`), view
+`dashboard_counts` с `security_invoker = true`, `security invoker` RPC
+`import_tool_units(jsonb)` (каждая строка в своём блоке
+`begin ... exception`, отчёт `{inserted, errors[{line, code, message}]}`).
+
+Решения: `security_invoker` вместо `security definer` с ручной проверкой
+роли; просрочка в дашборде без grace, как в `isOverdue()` интерфейса;
+существующая модель не меняется импортом; дыра "единицу можно завести сразу
+`RENTED`" закрыта политикой, а не переписыванием миграции этапа 4; QR
+содержит URL с `id`, а не инвентарный номер.
+
+Интерфейс: `/dashboard` (счётчики, просроченные аренды), `/tools/[id]`
+(единицы модели, добавление, смена статуса, списание с подтверждением),
+`/units/[id]` (карточка, текущая аренда, история, QR, кнопки "Issue" и
+"Accept return"), `/tools/import` (route handler
+`/api/import/tool-units`: предпросмотр и импорт, `;` и `,`, BOM,
+десятичная запятая, Windows-1251 как запасной вариант),
+`/tools/print-labels` (наклейки на A4, без навигации в печати).
+`/rentals/new?unit=<id>` предвыбирает единицу.
+
+Проверка: `tests/policies/07_dashboard_import.sql` и все предыдущие файлы -
+без `FAIL` (через `npx supabase db query --linked -f`, `psql` в окружении
+нет); `npx tsc --noEmit`, `npm run lint`, `npm run build` - без ошибок;
+route handler проверен `curl` с cookie тестовых сотрудников (401/403/400,
+предпросмотр и два импорта подряд файла-примера), страницы - на
+собранном `next start` под двумя ролями, печатная страница наклеек - снимком
+экрана в режиме печати.
+
+Находка по ходу: в фикстуре теста строка импорта, где ломался тариф, не
+доказывала откат подтранзакции (падала до создания модели), пришлось
+добавить строку с корректным тарифом и дублем номера единицы.
 
 ## Этап 8. Проверка политик и README
 

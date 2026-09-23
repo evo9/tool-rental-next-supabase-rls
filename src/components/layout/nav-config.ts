@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Drill, ScrollText, Settings, Users, type LucideIcon } from 'lucide-react';
+import { ArrowLeftRight, Drill, LayoutDashboard, ScrollText, Settings, Users, type LucideIcon } from 'lucide-react';
 import type { StaffRole } from '@/lib/roles';
 
 export type NavItem = {
@@ -8,9 +8,8 @@ export type NavItem = {
     minRole: StaffRole;
 };
 
-// Куда растёт меню на следующих этапах (пока не реализовано):
-//   Dashboard      /dashboard      LayoutDashboard   OPERATOR
 export const NAV_ITEMS: NavItem[] = [
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, minRole: 'OPERATOR' },
     { href: '/tools', label: 'Tools', icon: Drill, minRole: 'OPERATOR' },
     { href: '/customers', label: 'Customers', icon: Users, minRole: 'OPERATOR' },
     { href: '/rentals', label: 'Rentals', icon: ArrowLeftRight, minRole: 'OPERATOR' },

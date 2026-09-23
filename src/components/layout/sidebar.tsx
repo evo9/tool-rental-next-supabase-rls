@@ -7,7 +7,7 @@ import type { StaffRole } from '@/lib/roles';
 // поэтому клиентским остаётся только он, не весь сайдбар.
 export function Sidebar({ email, role }: { email: string; role: StaffRole | null }) {
     return (
-        <div className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r bg-muted/40 md:flex">
+        <div className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r bg-muted/40 md:flex print:hidden">
             <div className="p-4">
                 <Logo />
             </div>

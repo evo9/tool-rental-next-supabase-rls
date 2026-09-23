@@ -21,7 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Sidebar email={user.email ?? ''} role={role} />
             <div className="flex min-w-0 flex-1 flex-col">
                 <MobileNav email={user.email ?? ''} role={role} />
-                <main className="min-w-0 max-w-6xl p-6 md:p-8">{children}</main>
+                <main className="min-w-0 max-w-6xl p-6 md:p-8 print:max-w-none print:p-0">{children}</main>
             </div>
         </div>
     );

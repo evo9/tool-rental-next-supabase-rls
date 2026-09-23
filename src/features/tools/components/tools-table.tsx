@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
@@ -27,7 +28,11 @@ export function ToolsTable({ tools }: { tools: Tool[] }) {
             <TableBody>
                 {tools.map((tool) => (
                     <TableRow key={tool.id}>
-                        <TableCell>{tool.name}</TableCell>
+                        <TableCell>
+                            <Link href={`/tools/${tool.id}`} className="font-medium hover:underline">
+                                {tool.name}
+                            </Link>
+                        </TableCell>
                         <TableCell className="text-right">{formatMoney(tool.daily_rate)}</TableCell>
                         <TableCell className="text-right">{formatMoney(tool.deposit_value)}</TableCell>
                     </TableRow>
