@@ -4,9 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { formatMoney } from '@/lib/format';
 import { returnRentalItems } from '../actions';
 import { uploadRentalPhoto } from '../upload';
 import type { getRentalWithDetails } from '../queries';
+import type { RentalEstimateRow } from '@/features/pricing/types';
 
 // import type - серверный запрос в клиентский бандл не попадает, нужен
 // только тип строки позиции.
@@ -15,8 +17,21 @@ type Item = NonNullable<Awaited<ReturnType<typeof getRentalWithDetails>>>['items
 /** Позиции, ещё не возвращённые (returned_at is null) - отметить, снять
  *  фото каждой отмеченной, подтвердить. Возврат без фото отклонит база
  *  (rental_items_return_requires_photo), но сообщение понятнее показать
- *  до отправки, а не после 23514. */
-export function ReturnForm({ rentalId, items }: { rentalId: string; items: Item[] }) {
+ *  до отправки, а не после 23514.
+ *
+ *  estimateByItem - оценка rental_estimate() на момент загрузки страницы:
+ *  сумма к оплате по каждой отмеченной позиции, до подтверждения. После
+ *  подтверждения router.refresh() перечитает страницу и покажет уже
+ *  сохранённый rental_items.amount - окончательный, не оценку. */
+export function ReturnForm({
+    rentalId,
+    items,
+    estimateByItem,
+}: {
+    rentalId: string;
+    items: Item[];
+    estimateByItem: Record<string, RentalEstimateRow>;
+}) {
     const router = useRouter();
     const [checked, setChecked] = useState<Record<string, boolean>>({});
     const [photos, setPhotos] = useState<Record<string, File | null>>({});
@@ -28,6 +43,7 @@ export function ReturnForm({ rentalId, items }: { rentalId: string; items: Item[
 
     const selectedIds = openItems.filter((i) => checked[i.id]).map((i) => i.id);
     const missingPhoto = selectedIds.some((id) => !photos[id]);
+    const selectedTotal = selectedIds.reduce((sum, id) => sum + (estimateByItem[id]?.amount ?? 0), 0);
 
     async function handleSubmit() {
         if (selectedIds.length === 0) {
@@ -81,6 +97,12 @@ export function ReturnForm({ rentalId, items }: { rentalId: string; items: Item[
                                 {item.tool_units?.tools && (
                                     <span className="text-muted-foreground"> - {item.tool_units.tools.name}</span>
                                 )}
+                                {estimateByItem[item.id] && (
+                                    <span className="text-muted-foreground">
+                                        {' '}
+                                        - {formatMoney(estimateByItem[item.id].amount)} so far
+                                    </span>
+                                )}
                             </span>
                         </label>
                         {checked[item.id] && (
@@ -97,6 +119,10 @@ export function ReturnForm({ rentalId, items }: { rentalId: string; items: Item[
                     </div>
                 ))}
             </div>
+
+            {selectedIds.length > 0 && (
+                <p className="text-sm font-medium">To charge: {formatMoney(selectedTotal)}</p>
+            )}
 
             {error && <p className="text-sm text-red-600">{error}</p>}
 

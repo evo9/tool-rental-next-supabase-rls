@@ -74,7 +74,38 @@
 
 ## Этап 5. Тариф и просрочка
 
-Не начат.
+Готово. Миграция `pricing_and_overdue`: таблица `category_grace_periods`
+(seed по 4 категориям, гранты и политики по образцу `tools`), снимки
+`rentals.grace_hours`/`rental_items.daily_rate` (backfill, потом
+`NOT NULL`), `rental_items.amount` и ограничение
+`rental_items_amount_matches_return`, чистая `immutable`-функция
+`calc_rental_amount()`, триггеры `rentals_set_grace_hours`,
+`rental_items_set_daily_rate`, `rental_items_set_return_amount` (порядок
+с `rental_items_set_return` этапа 4 держит имя), `security invoker`
+RPC `rental_estimate()`.
+
+Решения: снимок тарифа и grace в момент создания строки, а не
+пересчёт по текущим значениям - сумма выданной или закрытой аренды не
+меняется задним числом; расчёт при возврате - отдельный триггер, а не
+расширение `rental_items_set_return` этапа 4 (не редактируется
+applied-миграция без найденной в ней ошибки); `rental_estimate()` для
+закрытых позиций берёт сумму из сохранённого `amount`, а не
+пересчитывает - защита от той же проблемы на уровне формулы целиком,
+если `calc_rental_amount()` когда-нибудь заменят.
+
+Интерфейс: `/settings/grace` (таблица grace по категориям, правка для
+`MANAGER+`), карточка аренды - сумма по каждой позиции и итог
+(`rental_estimate`), grace клиента в шапке, возврат - сумма к оплате по
+отмеченным позициям до подтверждения.
+
+Проверка: `tests/pricing/05_calc.sql` (десять граничных случаев чистой
+функции), `tests/policies/05_pricing.sql` и три предыдущих файла - без
+`FAIL`; `npx tsc --noEmit`, `npm run lint`, `npm run build` - без ошибок;
+`npm run seed:staff` - два прогона подряд без ошибок.
+
+Находка по ходу: `LATERAL` в `UPDATE ... FROM` не может ссылаться на
+цель обновления (`42P10`), почина - независимый экземпляр таблицы в
+подзапросе (`docs/rls-notes.md`, `docs/book/05-pricing.md` раздел 7).
 
 ## Этап 6. Аудит-лог
 

@@ -84,5 +84,6 @@ Supabase + RLS + серверный Next.js: как политики решаю�
 | [03-customers-storage.md](03-customers-storage.md) | 3 | Клиенты, приватный Storage, signed URL, колоночные гранты |
 | [03b-app-shell.md](03b-app-shell.md) | 3b | Сайдбар, лого, английский интерфейс, route groups, граница сервер/клиент |
 | [04-rentals.md](04-rentals.md) | 4 | Частичный индекс, RPC, `security definer` в триггере, инвариант через данные |
+| [05-pricing.md](05-pricing.md) | 5 | Тариф и просрочка, `immutable`/`stable`/`volatile`, снимок значений, `security invoker` в RPC, читающем чужие строки |
 
-Главы этапов 4 и далее дописываются по мере того, как сделаны сами этапы.
+Главы этапов 5 и далее дописываются по мере того, как сделаны сами этапы.
