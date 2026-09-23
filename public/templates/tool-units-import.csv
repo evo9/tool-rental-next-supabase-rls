@@ -1,0 +1,4 @@
+﻿tool_name;daily_rate;deposit;inventory_number;status
+Rotary hammer;250.00;3000.00;RH-100;AVAILABLE
+Rotary hammer;250.00;3000.00;RH-101;
+Impact driver;150.00;1500.00;ID-100;UNAVAILABLE

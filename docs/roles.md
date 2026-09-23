@@ -130,9 +130,34 @@
 `actor_id` в логе - оператор, не `postgres`). `NULL` в `actor_id`/
 `actor_role` - действие без пользователя (миграция, `service_role`).
 
+## dashboard_counts, единицы, импорт (этап 7)
+
+| Действие | OPERATOR | MANAGER | SUPERADMIN | не сотрудник | anon |
+|---|---|---|---|---|---|
+| читать `dashboard_counts` | реальные числа | реальные числа | реальные числа | одна строка из нулей | 42501 |
+| писать в `dashboard_counts` | нет гранта | нет гранта | нет гранта | нет гранта | нет гранта |
+| создать единицу `AVAILABLE`/`UNAVAILABLE` | 42501 | да | да | 42501 | 42501 |
+| создать единицу `RENTED`/`WRITTEN_OFF` | 42501 | 42501 | 42501 | 42501 | 42501 |
+| `import_tool_units()` | все строки в отчёте с 42501 | да | да | все строки с 42501 | 42501 на execute |
+| создать модель с названием-дублем | 42501 | 23505 | 23505 | 42501 | 42501 |
+
+`dashboard_counts` создан с `security_invoker = true`: view выполняется с
+правами и RLS вызывающего, поэтому не-сотрудник видит нули, а не числа
+точки. Без этой опции view обходил бы RLS базовых таблиц.
+
+Единицу нельзя создать сразу выданной или списанной: триггер
+`tool_units_guard_status` работает только на `update of status`, для вставки
+это условие держит `WITH CHECK` политики INSERT. Дубли названий моделей
+(без учёта регистра и крайних пробелов) отклоняет уникальный индекс
+`tools_name_normalized_key`.
+
+`import_tool_units()` - `security invoker`: права вставки решают политики
+`tools` и `tool_units`. Проверка роли в route handler `/api/import/tool-units`
+(`403` для оператора) - только UX.
+
 ## Общее
 
 - Деактивированный сотрудник (`is_active = false`) не проходит ни одну политику, кроме чтения своей строки в `staff`.
 - Анонимный запрос к таблицам `public` отклоняется на уровне грантов (`42501`). На `storage.objects` грант у `anon` выдан Supabase, поэтому там ответ пустой, а не ошибка.
 
-Проверка: `tests/policies/02_roles.sql`, `tests/policies/03_customers.sql`, `tests/policies/04_rentals.sql`, `tests/pricing/05_calc.sql`, `tests/policies/05_pricing.sql`, `tests/policies/06_audit.sql`.
+Проверка: `tests/policies/02_roles.sql`, `tests/policies/03_customers.sql`, `tests/policies/04_rentals.sql`, `tests/pricing/05_calc.sql`, `tests/policies/05_pricing.sql`, `tests/policies/06_audit.sql`, `tests/policies/07_dashboard_import.sql`.

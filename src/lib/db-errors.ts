@@ -94,12 +94,57 @@ const RULES: Rule[] = [
         matches: (e) => constraintName(e) === 'category_grace_periods_grace_hours_check',
         text: 'Enter a grace period between 0 and 72 hours.',
     },
+    {
+        // tool_units.inventory_number unique (этап 4): дубликат при добавлении
+        // единицы или в строке импорта (этап 7).
+        code: '23505',
+        matches: (e) => constraintName(e) === 'tool_units_inventory_number_key',
+        text: 'This inventory number is already in use.',
+    },
+    {
+        // Уникальный индекс по lower(btrim(name)) (этап 7).
+        code: '23505',
+        matches: (e) => constraintName(e) === 'tools_name_normalized_key',
+        text: 'A tool with this name already exists.',
+    },
+    {
+        code: '23514',
+        matches: (e) => constraintName(e) === 'tool_units_inventory_number_not_blank',
+        text: 'Enter an inventory number.',
+    },
+    {
+        // import_tool_units (этап 7): статус кроме AVAILABLE/UNAVAILABLE.
+        code: 'P0001',
+        matches: (e) => e.message.includes('AVAILABLE or UNAVAILABLE'),
+        text: 'Only Available and Unavailable units can be created.',
+    },
+    {
+        // import_tool_units (этап 7): пустое название модели.
+        code: 'P0001',
+        matches: (e) => e.message.includes('tool_name is required'),
+        text: 'Enter a tool name.',
+    },
+    {
+        // tool_units_guard_status (этап 4): WRITTEN_OFF - конечный статус.
+        code: 'P0001',
+        matches: (e) => e.message.includes('written off unit'),
+        text: 'A written off unit cannot change status.',
+    },
+    {
+        // tool_units_guard_status (этап 4): у единицы есть активная позиция.
+        code: 'P0001',
+        matches: (e) => e.message.includes('active rental item'),
+        text: 'This unit is out on an active rental. Accept the return first.',
+    },
 ];
 
 const GENERIC_BY_CODE: Record<string, string> = {
     '42501': "You don't have permission to do this.",
     '23514': "This data didn't pass validation.",
     '23505': 'This value is already in use.',
+    // Значение не приводится к типу колонки (import_tool_units, этап 7).
+    '22P02': 'A value has the wrong format.',
+    '23502': 'A required value is missing.',
     // Общий бизнес-код для raise exception без более точного правила выше -
     // tool_units_guard_status (переход статуса вручную) и не совпавшие
     // случаи rental_items_set_return/return_rental_items.

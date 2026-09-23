@@ -26,7 +26,7 @@ export function MobileNav({ email, role }: { email: string; role: StaffRole | nu
     }
 
     return (
-        <div className="sticky top-0 z-40 flex items-center gap-3 border-b bg-background px-4 py-3 md:hidden">
+        <div className="sticky top-0 z-40 flex items-center gap-3 border-b bg-background px-4 py-3 md:hidden print:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
                 <SheetTrigger render={<Button variant="ghost" size="icon" aria-label="Open menu" />}>
                     <Menu className="size-5" />

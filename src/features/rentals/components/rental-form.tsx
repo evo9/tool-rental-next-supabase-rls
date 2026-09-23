@@ -23,10 +23,10 @@ function defaultPlannedReturn(): string {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-export function RentalForm({ units }: { units: Unit[] }) {
+export function RentalForm({ units, initialUnitIds = [] }: { units: Unit[]; initialUnitIds?: string[] }) {
     const router = useRouter();
     const [customer, setCustomer] = useState<CustomerResult | null>(null);
-    const [unitIds, setUnitIds] = useState<string[]>([]);
+    const [unitIds, setUnitIds] = useState<string[]>(initialUnitIds);
     const [photos, setPhotos] = useState<Record<string, File | null>>({});
     const [plannedReturnAt, setPlannedReturnAt] = useState(defaultPlannedReturn);
     const [pending, setPending] = useState(false);

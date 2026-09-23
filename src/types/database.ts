@@ -317,7 +317,17 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      dashboard_counts: {
+        Row: {
+          active_rentals: number | null
+          available: number | null
+          overdue_rentals: number | null
+          rented: number | null
+          unavailable: number | null
+          written_off: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calc_rental_amount: {
@@ -338,6 +348,7 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["staff_role"]
       }
+      import_tool_units: { Args: { p_rows: Json }; Returns: Json }
       issue_rental: {
         Args: {
           p_customer_id: string
