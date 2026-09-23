@@ -109,7 +109,35 @@ applied-миграция без найденной в ней ошибки); `ren
 
 ## Этап 6. Аудит-лог
 
-Не начат.
+Готово. Миграция `audit_log`: таблица `audit_log` (гранты - только
+SELECT для `authenticated`, ничего для `anon`/`service_role`; политика
+SELECT - только SUPERADMIN, политик на запись нет вообще), универсальная
+триггерная функция `audit_log_row()` (`security definer`, одна на все
+таблицы через `TG_TABLE_NAME`/`TG_OP`/`TG_ARGV`/`to_jsonb`), семь
+триггеров `audit_*` на `staff`, `tools`, `tool_units`, `customers`,
+`rentals`, `rental_items`, `category_grace_periods`.
+
+Решения: `changed_fields` считается сравнением `jsonb` NEW/OLD, а не по
+факту наличия колонки в `SET` (та же ловушка, что с `update of <col>` в
+главах 3-4, здесь она затронула бы куда больше событий); `row_pk` -
+`text`, чтобы подойти и `uuid`-таблицам, и `category_grace_periods.category`
+(enum); `actor_id` без внешнего ключа на `staff` - лог обязан пережить
+удаление строки сотрудника, имя для интерфейса получают отдельным
+запросом.
+
+Интерфейс: `/audit`, только SUPERADMIN (защита - политика, скрытие
+пункта меню - UX), фильтры по таблице/сотруднику/дате, раскрытие записи -
+diff по `changed_fields` для UPDATE, полный снимок для INSERT/DELETE,
+пагинация по `id`.
+
+Проверка: `tests/policies/06_audit.sql` и все предыдущие файлы - без
+`FAIL`; `npx tsc --noEmit`, `npm run lint`, `npm run build` - без ошибок;
+`npm run seed:staff` - два прогона подряд без ошибок.
+
+Находка по ходу: тест изначально проверял содержимое `audit_log` под той
+же ролью (`OPERATOR`), что совершила действие, - политика пускает к
+логу только SUPERADMIN, даже к записям о собственных действиях автора
+(`docs/rls-notes.md`, `docs/book/06-audit-log.md` раздел 7).
 
 ## Этап 7. Дашборд и импорт
 

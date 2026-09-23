@@ -39,6 +39,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          actor_id: string | null
+          actor_role: Database["public"]["Enums"]["staff_role"] | null
+          at: string
+          changed_fields: string[] | null
+          id: number
+          new_data: Json | null
+          old_data: Json | null
+          op: string
+          row_pk: string
+          table_name: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_role?: Database["public"]["Enums"]["staff_role"] | null
+          at?: string
+          changed_fields?: string[] | null
+          id?: never
+          new_data?: Json | null
+          old_data?: Json | null
+          op: string
+          row_pk: string
+          table_name: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_role?: Database["public"]["Enums"]["staff_role"] | null
+          at?: string
+          changed_fields?: string[] | null
+          id?: never
+          new_data?: Json | null
+          old_data?: Json | null
+          op?: string
+          row_pk?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
       category_grace_periods: {
         Row: {
           category: Database["public"]["Enums"]["customer_category"]

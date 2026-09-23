@@ -107,9 +107,32 @@
 не-сотрудника соединение просто не находит строк и возвращает пустой
 результат, а не ошибку.
 
+## audit_log
+
+| Действие | OPERATOR | MANAGER | SUPERADMIN | service_role | не сотрудник | anon |
+|---|---|---|---|---|---|---|
+| читать | пусто | пусто | да | - | пусто | 42501 |
+| писать (insert/update/delete) | 42501 | 42501 | 42501 | 42501 | 42501 | 42501 |
+
+Запись не выдана вообще никому, включая `SUPERADMIN` и `service_role`
+(у которого есть `BYPASSRLS`, но нет гранта - см. `docs/rls-notes.md`) -
+пишет только триггер `audit_log_row()` (`security definer`), от имени
+владельца таблицы. Чтение - только `SUPERADMIN`, у `OPERATOR`/`MANAGER`
+грант `select` есть, но политика не пропускает ни одной строки (пусто, не
+ошибка); у `anon` гранта нет вообще (`42501`, отказ ещё до RLS).
+
+Триггеры `audit_*` стоят на `staff`, `tools`, `tool_units`, `customers`,
+`rentals`, `rental_items`, `category_grace_periods` и пишут запись при
+любом реальном изменении строки (`UPDATE`, где ничего не изменилось, не
+логируется). `actor_id` - `auth.uid()` вызывающего, включая случаи, когда
+изменение сделал не он сам напрямую, а другой `security definer`-триггер
+от его имени (`rental_items_sync_unit` меняет `tool_units.status`,
+`actor_id` в логе - оператор, не `postgres`). `NULL` в `actor_id`/
+`actor_role` - действие без пользователя (миграция, `service_role`).
+
 ## Общее
 
 - Деактивированный сотрудник (`is_active = false`) не проходит ни одну политику, кроме чтения своей строки в `staff`.
 - Анонимный запрос к таблицам `public` отклоняется на уровне грантов (`42501`). На `storage.objects` грант у `anon` выдан Supabase, поэтому там ответ пустой, а не ошибка.
 
-Проверка: `tests/policies/02_roles.sql`, `tests/policies/03_customers.sql`, `tests/policies/04_rentals.sql`, `tests/pricing/05_calc.sql`, `tests/policies/05_pricing.sql`.
+Проверка: `tests/policies/02_roles.sql`, `tests/policies/03_customers.sql`, `tests/policies/04_rentals.sql`, `tests/pricing/05_calc.sql`, `tests/policies/05_pricing.sql`, `tests/policies/06_audit.sql`.
