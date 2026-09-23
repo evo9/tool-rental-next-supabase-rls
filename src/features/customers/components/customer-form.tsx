@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { fileOrNull } from '@/lib/form-data';
 import { createCustomer } from '../actions';
-import { fileOrNull, uploadAndAttachPhotos } from '../upload';
+import { uploadAndAttachPhotos } from '../upload';
 import { CUSTOMER_CATEGORIES, type CustomerCategory } from '../types';
 import { CATEGORY_LABELS } from '../constants';
 

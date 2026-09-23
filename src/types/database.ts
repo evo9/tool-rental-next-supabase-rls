@@ -69,6 +69,106 @@ export type Database = {
         }
         Relationships: []
       }
+      rental_items: {
+        Row: {
+          id: string
+          issue_photo_path: string | null
+          rental_id: string
+          return_photo_path: string | null
+          returned_at: string | null
+          returned_by: string | null
+          tool_unit_id: string
+        }
+        Insert: {
+          id?: string
+          issue_photo_path?: string | null
+          rental_id: string
+          return_photo_path?: string | null
+          returned_at?: string | null
+          returned_by?: string | null
+          tool_unit_id: string
+        }
+        Update: {
+          id?: string
+          issue_photo_path?: string | null
+          rental_id?: string
+          return_photo_path?: string | null
+          returned_at?: string | null
+          returned_by?: string | null
+          tool_unit_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rental_items_rental_id_fkey"
+            columns: ["rental_id"]
+            isOneToOne: false
+            referencedRelation: "rentals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rental_items_returned_by_fkey"
+            columns: ["returned_by"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "rental_items_tool_unit_id_fkey"
+            columns: ["tool_unit_id"]
+            isOneToOne: false
+            referencedRelation: "tool_units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rentals: {
+        Row: {
+          closed_at: string | null
+          created_by: string
+          customer_id: string
+          id: string
+          issued_at: string
+          note: string | null
+          planned_return_at: string
+          status: Database["public"]["Enums"]["rental_status"]
+        }
+        Insert: {
+          closed_at?: string | null
+          created_by?: string
+          customer_id: string
+          id?: string
+          issued_at?: string
+          note?: string | null
+          planned_return_at: string
+          status?: Database["public"]["Enums"]["rental_status"]
+        }
+        Update: {
+          closed_at?: string | null
+          created_by?: string
+          customer_id?: string
+          id?: string
+          issued_at?: string
+          note?: string | null
+          planned_return_at?: string
+          status?: Database["public"]["Enums"]["rental_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rentals_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "rentals_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       staff: {
         Row: {
           created_at: string
@@ -92,6 +192,41 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      tool_units: {
+        Row: {
+          created_at: string
+          id: string
+          inventory_number: string
+          note: string | null
+          status: Database["public"]["Enums"]["tool_unit_status"]
+          tool_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inventory_number: string
+          note?: string | null
+          status?: Database["public"]["Enums"]["tool_unit_status"]
+          tool_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inventory_number?: string
+          note?: string | null
+          status?: Database["public"]["Enums"]["tool_unit_status"]
+          tool_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tool_units_tool_id_fkey"
+            columns: ["tool_id"]
+            isOneToOne: false
+            referencedRelation: "tools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tools: {
         Row: {
@@ -126,10 +261,25 @@ export type Database = {
         Args: never
         Returns: Database["public"]["Enums"]["staff_role"]
       }
+      issue_rental: {
+        Args: {
+          p_customer_id: string
+          p_planned_return_at: string
+          p_unit_ids: string[]
+        }
+        Returns: {
+          rental_id: string
+          rental_item_id: string
+          tool_unit_id: string
+        }[]
+      }
+      return_rental_items: { Args: { p_items: Json }; Returns: undefined }
     }
     Enums: {
       customer_category: "PLATINUM" | "GOLD" | "SILVER" | "NON_GRATA"
+      rental_status: "ACTIVE" | "CLOSED"
       staff_role: "OPERATOR" | "MANAGER" | "SUPERADMIN"
+      tool_unit_status: "AVAILABLE" | "RENTED" | "UNAVAILABLE" | "WRITTEN_OFF"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -261,7 +411,9 @@ export const Constants = {
   public: {
     Enums: {
       customer_category: ["PLATINUM", "GOLD", "SILVER", "NON_GRATA"],
+      rental_status: ["ACTIVE", "CLOSED"],
       staff_role: ["OPERATOR", "MANAGER", "SUPERADMIN"],
+      tool_unit_status: ["AVAILABLE", "RENTED", "UNAVAILABLE", "WRITTEN_OFF"],
     },
   },
 } as const

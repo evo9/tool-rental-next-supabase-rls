@@ -52,12 +52,52 @@ const RULES: Rule[] = [
         matches: (e) => e.message.includes('requires MANAGER role'),
         text: 'Only a manager or above can change the customer category.',
     },
+    {
+        // Частичный уникальный индекс rental_items_active_unit (этап 4) -
+        // единица уже в активной аренде.
+        code: '23505',
+        matches: (e) => constraintName(e) === 'rental_items_active_unit',
+        text: 'This unit is already out on an active rental.',
+    },
+    {
+        code: '23514',
+        matches: (e) => constraintName(e) === 'rental_items_return_requires_photo',
+        text: 'A photo is required to record a return.',
+    },
+    {
+        // rentals_guard_customer (этап 4) бросает P0001 с этим текстом.
+        code: 'P0001',
+        matches: (e) => e.message.includes('NON_GRATA'),
+        text: 'This customer is in the Non grata category and cannot rent tools.',
+    },
+    {
+        // rental_items_sync_unit (этап 4): единица UNAVAILABLE/WRITTEN_OFF.
+        code: 'P0001',
+        matches: (e) => e.message.includes('not available for issue'),
+        text: 'This unit is not available for issue.',
+    },
+    {
+        // issue_rental/return_rental_items (этап 4): повтор в массиве вызова.
+        code: 'P0001',
+        matches: (e) => e.message.includes('listed twice'),
+        text: 'The same unit is selected twice.',
+    },
+    {
+        // issue_rental/return_rental_items (этап 4): пустой список.
+        code: 'P0001',
+        matches: (e) => e.message.includes('select at least one'),
+        text: 'Select at least one unit.',
+    },
 ];
 
 const GENERIC_BY_CODE: Record<string, string> = {
     '42501': "You don't have permission to do this.",
     '23514': "This data didn't pass validation.",
     '23505': 'This value is already in use.',
+    // Общий бизнес-код для raise exception без более точного правила выше -
+    // tool_units_guard_status (переход статуса вручную) и не совпавшие
+    // случаи rental_items_set_return/return_rental_items.
+    P0001: 'This action is not allowed.',
 };
 
 const FALLBACK_TEXT = 'Something went wrong. Please try again.';

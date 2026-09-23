@@ -1,15 +1,9 @@
 import { createClient } from '@/lib/supabase/client';
+import { randomName } from '@/lib/random-name';
 import { attachCustomerPhotos } from './actions';
 import { CUSTOMER_PHOTOS_BUCKET, PHOTO_MIME_TO_EXT } from './constants';
 
 type PhotoKind = 'photo' | 'document';
-
-// crypto.randomUUID() есть только в защищённом контексте (HTTPS или localhost).
-// При тесте с телефона по http://<LAN-IP> его нет, getRandomValues доступен всегда.
-function randomName(): string {
-    const bytes = crypto.getRandomValues(new Uint8Array(16));
-    return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
-}
 
 /** Загружает файл из браузера напрямую в Storage. Возвращает путь в бакете. */
 async function uploadCustomerPhoto(customerId: string, kind: PhotoKind, file: File) {
@@ -41,9 +35,4 @@ export async function uploadAndAttachPhotos(
 
     const result = await attachCustomerPhotos(customerId, { photoPath, documentPhotoPath });
     if (!result.ok) throw new Error(result.error);
-}
-
-/** Пустой input type=file даёт в FormData File нулевого размера. */
-export function fileOrNull(value: FormDataEntryValue | null): File | null {
-    return value instanceof File && value.size > 0 ? value : null;
 }
