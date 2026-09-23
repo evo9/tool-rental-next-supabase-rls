@@ -3,7 +3,8 @@
 import { useState, SubmitEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { fileOrNull, uploadAndAttachPhotos } from '../upload';
+import { fileOrNull } from '@/lib/form-data';
+import { uploadAndAttachPhotos } from '../upload';
 import { PhotoInput } from './customer-form';
 
 /** Добавить или заменить фото. Старый файл остаётся в бакете как история. */

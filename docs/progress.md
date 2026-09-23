@@ -47,7 +47,30 @@
 
 ## Этап 4. Аренда: выдача и возврат
 
-Не начат.
+Готово. Миграции: `tool_units_and_rentals` (таблицы `tool_units`,
+`rentals`, `rental_items`, частичный уникальный индекс
+`rental_items_active_unit`, триггеры `tool_units_guard_status`,
+`rentals_guard_customer`, `rental_items_set_return`,
+`rental_items_sync_unit`), `rentals_rpc_and_storage` (RPC `issue_rental`,
+`return_rental_items`, бакет `rental-photos`). Плюс две небольшие
+миграции по ходу: грант `service_role` на `rental_items` и исправление
+`tool_units_guard_status` для no-op `UPDATE` статуса (обе истории -
+`docs/rls-notes.md`).
+
+Решения: статус `tool_units` - производная от данных `rental_items`, а
+не флаг; выдача и возврат - RPC для атомарности, но без расширения прав
+(`security invoker`); позиция аренды пишется политикой, а не триггером
+(нет `OLD` у `INSERT`).
+
+Интерфейс: `/rentals` (список, фильтр по статусу, просрочка подсвечена),
+`/rentals/new` (поиск клиента, выбор единиц с поиском, фото на каждую),
+`/rentals/[id]` (карточка, частичный возврат с фото), аренды клиента - в
+его карточке. Сид дополнен тестовыми моделями и единицами
+(`npm run seed:staff`).
+
+Проверка: `tests/policies/04_rentals.sql` и оба предыдущих файла - без
+`FAIL`; `npx tsc --noEmit`, `npm run lint`, `npm run build` - без ошибок;
+`npm run seed:staff` - три прогона подряд без ошибок.
 
 ## Этап 5. Тариф и просрочка
 

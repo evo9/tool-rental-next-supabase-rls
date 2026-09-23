@@ -83,5 +83,6 @@ Supabase + RLS + серверный Next.js: как политики решаю�
 | [02-roles.md](02-roles.md) | 2 | Роли сотрудников, `current_staff_role()`, `USING` против `WITH CHECK` |
 | [03-customers-storage.md](03-customers-storage.md) | 3 | Клиенты, приватный Storage, signed URL, колоночные гранты |
 | [03b-app-shell.md](03b-app-shell.md) | 3b | Сайдбар, лого, английский интерфейс, route groups, граница сервер/клиент |
+| [04-rentals.md](04-rentals.md) | 4 | Частичный индекс, RPC, `security definer` в триггере, инвариант через данные |
 
 Главы этапов 4 и далее дописываются по мере того, как сделаны сами этапы.
