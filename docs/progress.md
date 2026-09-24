@@ -175,6 +175,29 @@ route handler проверен `curl` с cookie тестовых сотрудн�
 доказывала откат подтранзакции (падала до создания модели), пришлось
 добавить строку с корректным тарифом и дублем номера единицы.
 
-## Этап 8. Проверка политик и README
+## Этап 8. Матрица прав через API и README
 
-Не начат.
+Готово. Все этапы 0-8 закрыты.
+
+Сид: четвёртый пользователь, деактивированный оператор
+(`inactive@example.com`). `tests/api/`: матрица данными (`matrix.ts`, 62
+проверки, 5 участников: anon, деактивированный, OPERATOR, MANAGER,
+SUPERADMIN), логин настоящими JWT, таблица в консоль и отчёт
+`docs/policy-matrix-report.md`, ненулевой код при расхождении; сценарий
+"деактивация на лету" (один токен до и после). Скрипты: `test:sql` (все
+SQL-тесты по порядку, `psql` или запасной путь через
+`supabase db query --linked`), `test:api`, `test:all`, `check:bundle`
+(`next build`, поиск secret key, пароля сида и `service_role` в
+`.next/static`, проверка имён `NEXT_PUBLIC_*`). `tests/manual/`:
+`break-policy.sql`, `restore-policy.sql`, `cleanup-matrix-data.sql`.
+`README.md` по разделу 7 плана.
+
+Находка: у `tool_units` была политика DELETE для SUPERADMIN без гранта
+DELETE, удалить единицу не мог никто. Исправлено миграцией
+`grant_delete_tool_units`, регрессия - `tests/policies/08_tool_units_delete.sql`.
+
+Проверка: `npm run test:sql` - 8 файлов без `FAIL`; `npm run test:api` - 310
+ячеек совпали, два прогона подряд; сломанная политика
+(`break-policy.sql`) даёт ровно одно расхождение (`tools.insert`, OPERATOR),
+после `restore-policy.sql` снова 0; `npm run check:bundle` - секретов в
+бандле нет; `npx tsc --noEmit`, `npm run lint` - без ошибок.

@@ -8,10 +8,15 @@ if (!url || !serviceKey || !password) {
     throw new Error('Нужны NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SECRET_KEY, SEED_PASSWORD');
 }
 
+// Четвёртый пользователь - деактивированный оператор (этап 8): матрица
+// tests/api проверяет, что доступ пропадает без перевыпуска токена. Имя без
+// префикса "Тест ": tests/policies/02_roles.sql считает строки staff по
+// like 'Тест %' и ждёт ровно три.
 const USERS = [
-    { email: 'operator@example.com', full_name: 'Тест Оператор', role: 'OPERATOR' },
-    { email: 'manager@example.com', full_name: 'Тест Менеджер', role: 'MANAGER' },
-    { email: 'admin@example.com', full_name: 'Тест Суперадмин', role: 'SUPERADMIN' },
+    { email: 'operator@example.com', full_name: 'Тест Оператор', role: 'OPERATOR', is_active: true },
+    { email: 'manager@example.com', full_name: 'Тест Менеджер', role: 'MANAGER', is_active: true },
+    { email: 'admin@example.com', full_name: 'Тест Суперадмин', role: 'SUPERADMIN', is_active: true },
+    { email: 'inactive@example.com', full_name: 'Неактивный Оператор', role: 'OPERATOR', is_active: false },
 ] as const;
 
 // Тестовый инвентарь для этапа 4: нет интерфейса управления моделями
@@ -105,9 +110,9 @@ async function main() {
         const userId = await ensureUser(u.email);
         const { error } = await admin
             .from('staff')
-            .upsert({ user_id: userId, full_name: u.full_name, role: u.role, is_active: true });
+            .upsert({ user_id: userId, full_name: u.full_name, role: u.role, is_active: u.is_active });
         if (error) throw error;
-        console.log(`${u.role.padEnd(10)} ${u.email}  ${userId}`);
+        console.log(`${u.role.padEnd(10)} ${u.email}  ${userId}${u.is_active ? '' : '  (inactive)'}`);
     }
 
     for (const tool of TOOLS) {
