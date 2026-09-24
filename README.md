@@ -1,5 +1,16 @@
 # Tool Rental
 
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
+![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000000?logo=shadcnui&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-17-4169E1?logo=postgresql&logoColor=white)
+![Row Level Security](https://img.shields.io/badge/Row_Level_Security-enforced-3FCF8E)
+![Zod](https://img.shields.io/badge/Zod-4-3E67B1?logo=zod&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-20+-5FA04E?logo=nodedotjs&logoColor=white)
+
 A tool-rental point-of-sale app on Next.js and Supabase. It is a learning and portfolio project, and its subject is **role-based access control enforced inside Postgres**: permissions are grants, row-level security policies and triggers in the database. The checks in the UI only make the interface friendlier; they never replace the ones in the database.
 
 The repository is written to be read like a textbook. Every migration explains each policy, function and trigger, every stage has a chapter in [`docs/book/`](docs/book/README.md), and the permission matrix is proven with real API requests rather than claimed.
