@@ -87,5 +87,5 @@ Supabase + RLS + серверный Next.js: как политики решаю�
 | [05-pricing.md](05-pricing.md) | 5 | Тариф и просрочка, `immutable`/`stable`/`volatile`, снимок значений, `security invoker` в RPC, читающем чужие строки |
 | [06-audit-log.md](06-audit-log.md) | 6 | Аудит-лог, одна триггерная функция на несколько таблиц, `auth.uid()` внутри `security definer`, запрет записи двумя слоями |
 | [07-dashboard-import-qr.md](07-dashboard-import-qr.md) | 7 | Дашборд, `view` с `security_invoker` и ловушка обхода RLS, route handler, подтранзакции в plpgsql, импорт CSV, QR |
+| [08-policy-matrix.md](08-policy-matrix.md) | 8 | Матрица прав через настоящий API, "пусто" против "запрещено", деактивация без перевыпуска токена, роль в таблице против роли в JWT, проверка бандла |
 
-Главы этапов 6 и далее дописываются по мере того, как сделаны сами этапы.

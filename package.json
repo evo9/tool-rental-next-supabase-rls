@@ -11,7 +11,11 @@
     "db:push": "supabase db push",
     "db:reset": "supabase db reset --linked",
     "db:types": "supabase gen types typescript --linked > src/types/database.ts",
-    "seed:staff": "tsx --env-file=.env.local scripts/seed-staff.ts"
+    "seed:staff": "tsx --env-file=.env.local scripts/seed-staff.ts",
+    "test:sql": "tsx --env-file=.env.local scripts/run-sql-tests.ts",
+    "test:api": "tsx --env-file=.env.local tests/api/run.ts",
+    "test:all": "npm run test:sql && npm run test:api",
+    "check:bundle": "tsx --env-file=.env.local scripts/check-bundle.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

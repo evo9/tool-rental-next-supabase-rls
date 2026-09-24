@@ -155,9 +155,28 @@
 `tools` и `tool_units`. Проверка роли в route handler `/api/import/tool-units`
 (`403` для оператора) - только UX.
 
+## Деактивированный сотрудник и проверка через API (этап 8)
+
+Матрица `tests/api/matrix.ts` (62 проверки, 5 участников, 310 ячеек) прогоняет
+все таблицы и действия из этого файла настоящими запросами: `anon`,
+деактивированный оператор (`is_active = false`, токен выдан и действителен),
+`OPERATOR`, `MANAGER`, `SUPERADMIN`. Результат - `docs/policy-matrix-report.md`.
+
+| Ситуация | Чтение таблиц | Запись | Своя строка `staff` |
+|---|---|---|---|
+| деактивированный | пусто | 42501 (вставка) / 0 строк (update, delete) | читает |
+
+Доступ пропадает со следующего запроса той же сессии, токен не перевыпускается:
+роль лежит в таблице `staff`, а не в JWT.
+
+Расхождение, найденное матрицей: у `tool_units` была политика DELETE для
+SUPERADMIN, но не было гранта DELETE, и удалить единицу не мог никто (42501).
+Грант выдан миграцией `20260924051050_grant_delete_tool_units.sql`; в таблице
+`tool_units` выше строка "удалить" описывает состояние после неё.
+
 ## Общее
 
 - Деактивированный сотрудник (`is_active = false`) не проходит ни одну политику, кроме чтения своей строки в `staff`.
 - Анонимный запрос к таблицам `public` отклоняется на уровне грантов (`42501`). На `storage.objects` грант у `anon` выдан Supabase, поэтому там ответ пустой, а не ошибка.
 
-Проверка: `tests/policies/02_roles.sql`, `tests/policies/03_customers.sql`, `tests/policies/04_rentals.sql`, `tests/pricing/05_calc.sql`, `tests/policies/05_pricing.sql`, `tests/policies/06_audit.sql`, `tests/policies/07_dashboard_import.sql`.
+Проверка: `tests/policies/02_roles.sql`, `tests/policies/03_customers.sql`, `tests/policies/04_rentals.sql`, `tests/pricing/05_calc.sql`, `tests/policies/05_pricing.sql`, `tests/policies/06_audit.sql`, `tests/policies/07_dashboard_import.sql`, `tests/policies/08_tool_units_delete.sql`, `tests/api/matrix.ts` (`npm run test:api`).
